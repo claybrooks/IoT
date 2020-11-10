@@ -5,9 +5,11 @@ import os
 import sys
 import time
 
+
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.relpath(__file__)), '..'))
 print ("Found root: " + ROOT_DIR)
 sys.path.append(ROOT_DIR)
+
 
 ########################################################################################################################
 # ZIGBEE
@@ -26,9 +28,11 @@ from aws.data_link import aws_link
 PORT = "/dev/ttyUSB0"
 BAUD_RATE = 9600
 
+
 # map to enforce AWS update on change only.  The zigbees are configured to only send data on change, this is the last
 # line of defense
 ZIGBEE_DIO1_DATA = {}
+
 
 ########################################################################################################################
 #

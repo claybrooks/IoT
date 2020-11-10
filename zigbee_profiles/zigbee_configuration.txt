@@ -1,0 +1,10 @@
+Just a document for tracking zigbee configurations made
+
+-- Clay
+    - Three zigbee devices
+        - endpoint
+        - router
+        - coordinator
+    - All set to API level 1
+    - endpoint set to send frame on DIO voltage level change
+        - Can also be set to poll DIO pin periodically to send updates

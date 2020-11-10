@@ -62,12 +62,14 @@ void loop() {
 
   if (avg > 30)
   {
-    digitalWrite(xbeePin, 1);
-    digitalWrite(statPin, 1);
+    Serial.println("Unparked, low");
+    digitalWrite(xbeePin, 0);
+    digitalWrite(statPin, 0);
   }
   else
   {
-    digitalWrite(xbeePin, 0);
-    digitalWrite(statPin, 0);
+    Serial.println("parked, high");
+    digitalWrite(xbeePin, 1);
+    digitalWrite(statPin, 1);
   }
 }

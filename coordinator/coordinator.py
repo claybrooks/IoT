@@ -1,6 +1,7 @@
 ########################################################################################################################
 # PYTHON
 ########################################################################################################################
+import json
 import os
 import sys
 import time
@@ -15,7 +16,7 @@ sys.path.append(ROOT_DIR)
 # ZIGBEE
 ########################################################################################################################
 from digi.xbee.devices import RemoteXBeeDevice, ZigBeeDevice
-from digi.xbee.io import IOLine, IOSample
+from digi.xbee.io import IOLine, IOSample, IOValue
 
 
 ########################################################################################################################
@@ -34,6 +35,14 @@ BAUD_RATE = 9600
 ZIGBEE_DIO1_DATA = {}
 
 
+# config that maps zigbee mac addresses to space locations
+SPACE_CONFIGURATION = {}
+
+
+# AWS api
+AWS = aws_link()
+
+
 ########################################################################################################################
 #
 ########################################################################################################################
@@ -44,7 +53,7 @@ def on_io_sample_received(sample:IOSample, remote:RemoteXBeeDevice, time:int):
         print ("Received IO sample doesn't have dio1, which is what we care about")
         return
 
-    addr = remote.get_64bit_addr()
+    addr = str(remote.get_64bit_addr())
     value = sample.get_digital_value(IOLine.DIO1_AD1)
 
     if addr not in ZIGBEE_DIO1_DATA:
@@ -54,11 +63,21 @@ def on_io_sample_received(sample:IOSample, remote:RemoteXBeeDevice, time:int):
         print (f"New data received from {addr} => {value}")
         ZIGBEE_DIO1_DATA[addr] = value
 
+    spaces = SPACE_CONFIGURATION['spaces']
+    location = SPACE_CONFIGURATION['location']
+    occupied = value == IOValue.HIGH
+    if addr not in spaces:
+        print (f"Address {addr} is not configured!")
+    else:
+        spot_number = spaces[addr]
+        print (f"Updating spot {spot_number} in {location} to {'occupied' if occupied else 'unoccupied'}")
+        AWS.put_spot(location, spot_number, occupied)
 
 ########################################################################################################################
 #
 ########################################################################################################################
 def main():
+    global SPACE_CONFIGURATION
 
     # create and open a serial connection to the device
     device = ZigBeeDevice(PORT, BAUD_RATE)
@@ -67,8 +86,9 @@ def main():
     # add a callback for the io sample
     device.add_io_sample_received_callback(on_io_sample_received)
 
-    # open up our aws link
-    # aws = aws_link()
+    # read  in our space configuration
+    with open(os.path.join(ROOT_DIR, 'config', 'garage_a.json')) as f:
+        SPACE_CONFIGURATION = json.load(f)
 
     try:
         device.flush_queues()

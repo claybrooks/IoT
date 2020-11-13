@@ -55,8 +55,8 @@ namespace iot.ViewModels
         public Command LoadItemsCommand { get; }
         public Command<Item> ItemTapped { get; }
 
-        private string _accessKey = "";
-        private string _secretId = "";
+        private string _accessKey = "INSERT_KEY_HERE";
+        private string _secretId = "INSERT_ID_HERE";
 
         private AmazonDynamoDBClient _client;
         private AmazonDynamoDBStreamsClient _streamClient;
@@ -81,6 +81,8 @@ namespace iot.ViewModels
                 string location = "null";
                 bool occupied = false;
                 string spot = "null";
+                string timeIn = "null";
+                string billedTime = "null";
 
                 foreach (KeyValuePair<string, AttributeValue> property in tableItem)
                 {
@@ -96,6 +98,14 @@ namespace iot.ViewModels
                     {
                         spot = property.Value.N;
                     }
+                    else if (property.Key == "TimeIn")
+                    {
+                        timeIn = property.Value.S;
+                    }
+                    else if (property.Key == "BilledTime")
+                    {
+                        billedTime = property.Value.S;
+                    }
                 }
 
                 SpotKey key = new SpotKey()
@@ -109,6 +119,8 @@ namespace iot.ViewModels
                     SpotLookup[key].Location    = location;
                     SpotLookup[key].Spot        = spot;
                     SpotLookup[key].Occupied    = occupied;
+                    SpotLookup[key].TimeIn      = timeIn;
+                    SpotLookup[key].BilledTime  = billedTime;
                 }
                 else
                 {
@@ -116,7 +128,9 @@ namespace iot.ViewModels
                     {
                         Location = location,
                         Occupied = occupied,
-                        Spot = spot
+                        Spot     = spot,
+                        TimeIn   = timeIn,
+                        BilledTime = billedTime,
                     };
                     added.Add(item);
                     SpotLookup.Add(key, item);

@@ -12,5 +12,7 @@ namespace iot.Models
         public string location;
         public string spot;
         public bool occupied;
+        public string timeIn;
+        public string billedTime;
     }
 }

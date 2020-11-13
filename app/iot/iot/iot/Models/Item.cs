@@ -37,5 +37,19 @@ namespace iot.Models
             get { return _Occupied; }
             set { _Occupied = value; OnPropertyChanged("Occupied"); }
         }
+
+        private string _TimeIn = "";
+        public string TimeIn
+        {
+            get { return _TimeIn; }
+            set { _TimeIn = value; OnPropertyChanged("TimeIn"); }
+        }
+
+        private string _BilledTime = "";
+        public string BilledTime
+        {
+            get { return _BilledTime; }
+            set { _BilledTime = value; OnPropertyChanged("BilledTime"); }
+        }
     }
 }

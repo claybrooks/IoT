@@ -329,3 +329,5 @@ UpgradeLog*.htm
 FakesAssemblies/
 
 .vscode/settings.json
+
+awscli-bundle.zip

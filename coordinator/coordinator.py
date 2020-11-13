@@ -70,7 +70,7 @@ def on_io_sample_received(sample:IOSample, remote:RemoteXBeeDevice, time:int):
         print (f"Address {addr} is not configured!")
     else:
         space = spaces[addr]
-        print ("Updating spot {space} in {location} to {'occupied' if occupied else 'unoccupied'}")
+        print (f"Updating spot {space} in {location} to {'occupied' if occupied else 'unoccupied'}")
         AWS.put_spot(location, space, occupied)
 
 ########################################################################################################################

@@ -19,12 +19,7 @@ class aws_link():
     #
     ####################################################################################################################
     def __init__(self):
-        self.dynamodb:Session.resource = boto3.resource(
-            'dynamodb',
-            region_name="us-east-2",
-            aws_access_key_id="AKIAJGM5GXVKQLGQRUOQ",
-            aws_secret_access_key="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"
-        )
+        self.dynamodb:Session.resource = boto3.resource('dynamodb')
         self.table = self.dynamodb.Table('Smart_Park')
 
         # check the stream specification and enable it if it's disabled

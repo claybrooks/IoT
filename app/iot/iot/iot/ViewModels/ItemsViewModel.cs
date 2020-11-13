@@ -106,10 +106,9 @@ namespace iot.ViewModels
 
                 if (SpotLookup.ContainsKey(key))
                 {
-                    SpotLookup[key].Location = location;
-                    SpotLookup[key].Spot = spot;
-                    SpotLookup[key].Occupied = occupied;
-
+                    SpotLookup[key].Location    = location;
+                    SpotLookup[key].Spot        = spot;
+                    SpotLookup[key].Occupied    = occupied;
                 }
                 else
                 {

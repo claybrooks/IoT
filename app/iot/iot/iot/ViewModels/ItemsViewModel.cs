@@ -55,8 +55,8 @@ namespace iot.ViewModels
         public Command LoadItemsCommand { get; }
         public Command<Item> ItemTapped { get; }
 
-        private string _accessKey = "AKIAJGM5GXVKQLGQRUOQ";
-        private string _secretId = "qBUdkjZN5rPX/t4a871Ar1mmh8U+0E6Bu6yNUpBF";
+        private string _accessKey = "";
+        private string _secretId = "";
 
         private AmazonDynamoDBClient _client;
         private AmazonDynamoDBStreamsClient _streamClient;

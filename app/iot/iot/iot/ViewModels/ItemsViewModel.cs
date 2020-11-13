@@ -6,39 +6,193 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
+using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DataModel;
+using Amazon.DynamoDBv2.Model;
+using Amazon.Runtime;
+using System.Collections.Generic;
+using System.Threading;
+
+
 namespace iot.ViewModels
 {
+    public class SpotKey
+    {
+        public string location;
+        public string spot; 
+        
+        public bool Equals(SpotKey other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return other.location == location && other.spot == spot;
+        }
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != typeof(SpotKey)) return false;
+            return Equals((SpotKey)obj);
+        }
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int result = location.GetHashCode();
+                result = (result * 397) ^ spot.GetHashCode();
+                return result;
+            }
+        }
+    }
+
     public class ItemsViewModel : BaseViewModel
     {
         private Item _selectedItem;
 
+        public Dictionary<SpotKey, Item> SpotLookup;
+
         public ObservableCollection<Item> Items { get; }
         public Command LoadItemsCommand { get; }
-        public Command AddItemCommand { get; }
         public Command<Item> ItemTapped { get; }
+
+        private string _accessKey = "AKIAJGM5GXVKQLGQRUOQ";
+        private string _secretId = "qBUdkjZN5rPX/t4a871Ar1mmh8U+0E6Bu6yNUpBF";
+
+        private AmazonDynamoDBClient _client;
+        private AmazonDynamoDBStreamsClient _streamClient;
+
+        private DynamoDBContext _context;
+        private AWSCredentials _credentials;
+
+        private Timer _timerHandle;
+
+        async public Task<List<Item>> UpdateSpots(string tableName)
+        {
+            var request = new ScanRequest
+            {
+                TableName = tableName
+            };
+
+            var response = await _client.ScanAsync(request);
+            List<Item> added = new List<Item>();
+
+            foreach (Dictionary<string, AttributeValue> tableItem in response.Items)
+            {
+                string location = "null";
+                bool occupied = false;
+                string spot = "null";
+
+                foreach (KeyValuePair<string, AttributeValue> property in tableItem)
+                {
+                    if (property.Key == "Location")
+                    {
+                        location = property.Value.S;
+                    }
+                    else if (property.Key == "Occupied")
+                    {
+                        occupied = property.Value.BOOL;
+                    }
+                    else if (property.Key == "Spot")
+                    {
+                        spot = property.Value.N;
+                    }
+                }
+
+                SpotKey key = new SpotKey()
+                {
+                    location = location,
+                    spot = spot
+                };
+
+                if (SpotLookup.ContainsKey(key))
+                {
+                    SpotLookup[key].Location = location;
+                    SpotLookup[key].Spot = spot;
+                    SpotLookup[key].Occupied = occupied;
+
+                }
+                else
+                {
+                    Item item = new Item()
+                    {
+                        Location = location,
+                        Occupied = occupied,
+                        Spot = spot
+                    };
+                    added.Add(item);
+                    SpotLookup.Add(key, item);
+                }
+
+            }
+
+            return added;
+        }
+
+        async public void UpdateGarageTable(Object state)
+        {
+            await ExecuteLoadItemsCommand(false);
+        }
+
+        public void DisplayGarageInfo(ScanResponse result)
+        {
+        }
+
+        public void HandleStream(object o, ResponseEventArgs r)
+        {
+            Console.WriteLine("Got a stream response");
+        }
+
 
         public ItemsViewModel()
         {
+            _credentials = new BasicAWSCredentials(_accessKey, _secretId);
+            _client = new AmazonDynamoDBClient(_credentials, Amazon.RegionEndpoint.USEast2);
+            _context = new DynamoDBContext(_client);
+
+            SpotLookup = new Dictionary<SpotKey, Item>();
+
             Title = "Browse";
             Items = new ObservableCollection<Item>();
             LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand());
 
             ItemTapped = new Command<Item>(OnItemSelected);
 
-            AddItemCommand = new Command(OnAddItem);
+            /*
+            _streamClient = new AmazonDynamoDBStreamsClient(_credentials, Amazon.RegionEndpoint.USEast2);
+            _streamClient.AfterResponseEvent += HandleStream;
+            Task<ListStreamsResponse> listStreamsResponseTask = _streamClient.ListStreamsAsync();
+            listStreamsResponseTask.Wait();
+            ListStreamsResponse listStreamsResponse = listStreamsResponseTask.Result;
+
+
+            foreach (StreamSummary streamSummary in listStreamsResponse.Streams)
+            {
+                int i = 0;
+                i++;
+            }
+            */
+
+            TimerCallback timerDelegate = new TimerCallback(UpdateGarageTable);
+            _timerHandle = new Timer(timerDelegate, null, 1000, 1000);
         }
 
-        async Task ExecuteLoadItemsCommand()
+        async Task ExecuteLoadItemsCommand(bool showBusy=true)
         {
-            IsBusy = true;
+            if (showBusy)
+            {
+                IsBusy = true;
+            }
 
             try
             {
-                Items.Clear();
-                var items = await DataStore.GetItemsAsync(true);
-                foreach (var item in items)
+                List<Item> added = await UpdateSpots("Smart_Park");
+
+                if (added.Count > 0)
                 {
-                    Items.Add(item);
+                    foreach (var item in added)
+                    {
+                        Items.Add(item);
+                    }
                 }
             }
             catch (Exception ex)
@@ -67,18 +221,13 @@ namespace iot.ViewModels
             }
         }
 
-        private async void OnAddItem(object obj)
-        {
-            await Shell.Current.GoToAsync(nameof(NewItemPage));
-        }
-
         async void OnItemSelected(Item item)
         {
             if (item == null)
                 return;
 
             // This will push the ItemDetailPage onto the navigation stack
-            await Shell.Current.GoToAsync($"{nameof(ItemDetailPage)}?{nameof(ItemDetailViewModel.ItemId)}={item.Id}");
+            await Shell.Current.GoToAsync($"{nameof(ItemDetailPage)}?{nameof(ItemDetailViewModel.ItemId)}={item.Spot}");
         }
     }
 }

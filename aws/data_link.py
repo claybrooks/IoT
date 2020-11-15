@@ -6,7 +6,7 @@ from boto3.session import Session
 from boto3.dynamodb.table import TableResource
 
 from pprint import pprint
-
+import time
 
 STREAM_VIEW_TYPE = "NEW_AND_OLD_IMAGES"
 
@@ -78,3 +78,19 @@ if __name__ == '__main__':
     if response_info:
         print("Put Spot succeeded:")
         pprint(response_info)
+
+    response_info = aws.put_spot("Smart_Park", 0, True)
+
+    response_info = aws.get_spot("Smart_Park", 0)
+    response_info = aws.get_spot("Smart_Park", 0)
+    response_info = aws.get_spot("Smart_Park", 0)
+    response_info = aws.get_spot("Smart_Park", 0)
+
+    response_info = aws.put_spot("Smart_Park", 0, False)
+
+    response_info = aws.get_spot("Smart_Park", 0)
+    response_info = aws.get_spot("Smart_Park", 0)
+    response_info = aws.get_spot("Smart_Park", 0)
+    response_info = aws.get_spot("Smart_Park", 0)
+
+    pass

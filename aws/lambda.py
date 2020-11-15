@@ -2,7 +2,7 @@ import json
 import boto3
 import datetime
 
-def lambda_handler(event, context):   
+def lambda_handler(event, context):
     try:
         for record in event['Records']:
             if record['eventName'] == 'INSERT':
@@ -18,6 +18,27 @@ def lambda_handler(event, context):
 
 def handle_insert(record):
     print('Handling INSERT event')
+    client = boto3.resource('dynamodb')
+    table = client.Table('Smart_Park')
+    print(table.table_status)
+    
+    print(record['dynamodb']['NewImage']['Location']['S'])
+    print(record['dynamodb']['NewImage']['Spot']['N'])
+    print(record['dynamodb']['NewImage']['Occupied']['BOOL'])
+    
+    response = table.update_item(
+        Key={
+            'Location':str(record['dynamodb']['NewImage']['Location']['S']),
+            'Spot':int(record['dynamodb']['NewImage']['Spot']['N'])
+        },
+        UpdateExpression="set Occupied=:o, TimeIn=:t",
+        ExpressionAttributeValues={
+            ':o': record['dynamodb']['NewImage']['Occupied']['BOOL'],
+            ':t': datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        },
+        ReturnValues="UPDATED_NEW"
+    )
+    return response
     
 def handle_modify(record):
     print('Handling MODIFY event')
@@ -66,16 +87,21 @@ def handle_modify(record):
         timeIn = 'Currently Out'
     elif occupiedNew == True and occupiedOld == False:
         timeIn = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        billedTime = ''
     
-    response = table.put_item(
-        Item={
-            'Location': location,
-            'Spot': int(spot),
-            'Occupied': occupiedNew,
-            'TimeIn':  str(timeIn),
-            'BilledTime': str(billedTime)
-        }
-        )
+    response = table.update_item(
+        Key={
+            'Location':str(record['dynamodb']['NewImage']['Location']['S']),
+            'Spot':int(record['dynamodb']['NewImage']['Spot']['N'])
+        },
+        UpdateExpression="set Occupied=:o, TimeIn=:t, BilledTime=:b",
+        ExpressionAttributeValues={
+            ':o': record['dynamodb']['NewImage']['Occupied']['BOOL'],
+            ':t': str(timeIn),
+            ':b': str(billedTime)
+        },
+        ReturnValues="UPDATED_NEW"
+    )
     print(response)
     
 def handle_remove(record):

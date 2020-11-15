@@ -61,6 +61,26 @@ class aws_link():
         else:
             return response
 
+    ####################################################################################################################
+    #
+    ####################################################################################################################
+    def update_spot(self, Location, Space, Occupied):
+        try:
+            response = self.table.update_item(
+            Key={
+                'Location': Location,
+                'Spot': Space
+            },
+            UpdateExpression="set Occupied=:o",
+            ExpressionAttributeValues={
+                ':o': Occupied,
+            },
+            ReturnValues="UPDATED_NEW"
+        )
+        except Exception as e:
+            print(e)
+        else:
+            return response
 
 ########################################################################################################################
 #
@@ -69,28 +89,20 @@ if __name__ == '__main__':
 
     aws = aws_link()
 
-    response_info = aws.get_spot("Home", 1,)
-    if response_info:
-        print("Get Spot succeeded:")
-        pprint(response_info)
+    # response_info = aws.get_spot("Home", 1,)
+    # if response_info:
+    #     print("Get Spot succeeded:")
+    #     pprint(response_info)
 
-    response_info = aws.put_spot("Home", 3, 'false')
-    if response_info:
-        print("Put Spot succeeded:")
-        pprint(response_info)
+    # response_info = aws.put_spot("Home", 3, 'false')
+    # if response_info:
+    #     print("Put Spot succeeded:")
+    #     pprint(response_info)
 
-    response_info = aws.put_spot("Smart_Park", 0, True)
+    # response_info = aws.put_spot("test", 0, True)
+    response_info = aws.update_spot("test", 0, True)
+    time.sleep(10.0)
+    response_info = aws.update_spot("test", 0, False)
 
-    response_info = aws.get_spot("Smart_Park", 0)
-    response_info = aws.get_spot("Smart_Park", 0)
-    response_info = aws.get_spot("Smart_Park", 0)
-    response_info = aws.get_spot("Smart_Park", 0)
-
-    response_info = aws.put_spot("Smart_Park", 0, False)
-
-    response_info = aws.get_spot("Smart_Park", 0)
-    response_info = aws.get_spot("Smart_Park", 0)
-    response_info = aws.get_spot("Smart_Park", 0)
-    response_info = aws.get_spot("Smart_Park", 0)
 
     pass

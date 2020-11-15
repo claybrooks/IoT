@@ -19,8 +19,8 @@ namespace iot.ViewModels
     public class SpotKey
     {
         public string location;
-        public string spot; 
-        
+        public string spot;
+
         public bool Equals(SpotKey other)
         {
             if (ReferenceEquals(null, other)) return false;
@@ -55,11 +55,10 @@ namespace iot.ViewModels
         public Command LoadItemsCommand { get; }
         public Command<Item> ItemTapped { get; }
 
-        private string _accessKey = "";
-        private string _secretId = "";
+        private string _accessKey = "INSERT_KEY_HERE";
+        private string _secretId = "INSERT_ID_HERE";
 
         private AmazonDynamoDBClient _client;
-        private AmazonDynamoDBStreamsClient _streamClient;
 
         private DynamoDBContext _context;
         private AWSCredentials _credentials;
@@ -81,6 +80,8 @@ namespace iot.ViewModels
                 string location = "null";
                 bool occupied = false;
                 string spot = "null";
+                string timeIn = "null";
+                string billedTime = "null";
 
                 foreach (KeyValuePair<string, AttributeValue> property in tableItem)
                 {
@@ -96,6 +97,14 @@ namespace iot.ViewModels
                     {
                         spot = property.Value.N;
                     }
+                    else if (property.Key == "TimeIn")
+                    {
+                        timeIn = property.Value.S;
+                    }
+                    else if (property.Key == "BilledTime")
+                    {
+                        billedTime = property.Value.S;
+                    }
                 }
 
                 SpotKey key = new SpotKey()
@@ -106,18 +115,19 @@ namespace iot.ViewModels
 
                 if (SpotLookup.ContainsKey(key))
                 {
-                    SpotLookup[key].Location = location;
-                    SpotLookup[key].Spot = spot;
-                    SpotLookup[key].Occupied = occupied;
-
+                    SpotLookup[key].Occupied    = occupied;
+                    SpotLookup[key].TimeIn      = timeIn        != "null" ? timeIn      : SpotLookup[key].TimeIn;
+                    SpotLookup[key].BilledTime  = billedTime    != "null" ? billedTime  : SpotLookup[key].BilledTime;
                 }
                 else
                 {
                     Item item = new Item()
                     {
-                        Location = location,
-                        Occupied = occupied,
-                        Spot = spot
+                        Location    = location,
+                        Occupied    = occupied,
+                        Spot        = spot,
+                        TimeIn      = timeIn,
+                        BilledTime  = billedTime,
                     };
                     added.Add(item);
                     SpotLookup.Add(key, item);

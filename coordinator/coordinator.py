@@ -39,17 +39,29 @@ NODE_DATA = {}
 SPACE_CONFIGURATION = {}
 
 
+# map of string space names to their associated DIO lines
 SPACE_TO_DIO_LINE = {
-    '1', IOLine.DIO1_AD1,
-    '2', IOLine.DIO2_AD2,
-    '3', IOLine.DIO3_AD3,
-    '4', IOLine.DIO4_AD4,
-    '5', IOLine.DIO5_AD5,
-    '6', IOLine.DIO6,
-    '7', IOLine.DIO7,
-    '8', IOLine.DIO8,
-    '9', IOLine.DIO9,
+    1: IOLine.DIO1_AD1,
+    2: IOLine.DIO2_AD2,
+    3: IOLine.DIO3_AD3,
+    4: IOLine.DIO4_AD4,
+    5: IOLine.DIO5_AD5,
+    6: IOLine.DIO6,
+    7: IOLine.DIO7,
+    8: IOLine.DIO8,
+    9: IOLine.DIO9,
+    10: IOLine.DIO10_PWM0,
+    11: IOLine.DIO11_PWM1,
+    12: IOLine.DIO12,
+    13: IOLine.DIO13,
+    14: IOLine.DIO14,
+    15: IOLine.DIO15,
+    16: IOLine.DIO16,
+    17: IOLine.DIO17,
+    18: IOLine.DIO18,
+    19: IOLine.DIO19
 }
+
 
 # AWS api
 AWS = aws_link()
@@ -60,33 +72,58 @@ AWS = aws_link()
 ########################################################################################################################
 def on_io_sample_received(sample:IOSample, remote:RemoteXBeeDevice, time:int):
 
+    # get the address of the sender node
     addr = str(remote.get_64bit_addr())
 
+    # add this address to our node data if it doesn't exist
     if addr not in NODE_DATA:
         NODE_DATA[addr] = {}
 
-    # get configuration dio lines for this addr
-    nodes = SPACE_CONFIGURATION['nodes']
-    node = nodes[str(addr)]
+    # Data we have about our configured nodes
+    nodes       = SPACE_CONFIGURATION['nodes']
 
-    value = sample.get_digital_value(IOLine.DIO1_AD1)
+    if str(addr) not in nodes:
+        print (f'addr {addr} not in configuration file!!')
+        return
 
-    if addr not in ZIGBEE_DIO1_DATA:
-        ZIGBEE_DIO1_DATA[addr] = None
+    # Data we have about the node that triggered this callback
+    node        = nodes[str(addr)]
+    # The name of this garage
+    location    = SPACE_CONFIGURATION['location']
 
-    if ZIGBEE_DIO1_DATA[addr] != value:
-        print (f"New data received from {addr} => {value}")
-        ZIGBEE_DIO1_DATA[addr] = value
+    # go through each dio and see if the incoming IOSample has it and what it's value is
+    for s in node:
+        config_dio = s['dio']
+        space = int(s['space'])
 
-    spaces = SPACE_CONFIGURATION['spaces']
-    location = SPACE_CONFIGURATION['location']
-    occupied = value == IOValue.HIGH
-    if addr not in spaces:
-        print (f"Address {addr} is not configured!")
-    else:
-        space = spaces[addr]
-        print (f"Updating spot {space} in {location} to {'occupied' if occupied else 'unoccupied'}")
-        AWS.put_spot(location, space, occupied)
+        # unpack useful configuration data
+        dio = SPACE_TO_DIO_LINE[config_dio]
+
+        # this io sample is not present in this update, just ignore and continue
+        if not sample.has_digital_value(dio):
+            continue
+
+        # Get the current known state of this dio line
+        current = NODE_DATA[addr].get(dio, None)
+        # Get the new state of this dio line
+        new = sample.get_digital_value(dio)
+
+        # if they are the same, just continue
+        if new == current:
+            #print (f"Incoming dio line {dio} from addr {addr} is the same!")
+            continue
+
+        print (f"New data received from {addr} => {str(dio)}={new}")
+
+        # update our internal map of data
+        NODE_DATA[addr][dio] = new
+
+        # see if the space is occupied
+        occupied = new == IOValue.LOW
+
+        # send it off to aws
+        AWS.set_spot(location, space, occupied)
+
 
 ########################################################################################################################
 #
@@ -94,20 +131,20 @@ def on_io_sample_received(sample:IOSample, remote:RemoteXBeeDevice, time:int):
 def main():
     global SPACE_CONFIGURATION
 
+    # read  in our space configuration
+    with open(os.path.join(ROOT_DIR, 'config', 'garage_a_v2.json')) as f:
+        SPACE_CONFIGURATION = json.load(f)
+
     # create and open a serial connection to the device
     device = ZigBeeDevice(PORT, BAUD_RATE)
     device.open()
 
-    # add a callback for the io sample
-    device.add_io_sample_received_callback(on_io_sample_received)
-
-    # read  in our space configuration
-    with open(os.path.join(ROOT_DIR, 'config', 'garage_a.json')) as f:
-        SPACE_CONFIGURATION = json.load(f)
-
     try:
         device.flush_queues()
         print("Waiting for data...\n")
+
+        # add a callback for the io sample
+        device.add_io_sample_received_callback(on_io_sample_received)
 
         while True:
             time.sleep(1)

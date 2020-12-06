@@ -32,12 +32,24 @@ BAUD_RATE = 9600
 
 # map to enforce AWS update on change only.  The zigbees are configured to only send data on change, this is the last
 # line of defense
-ZIGBEE_DIO1_DATA = {}
+NODE_DATA = {}
 
 
 # config that maps zigbee mac addresses to space locations
 SPACE_CONFIGURATION = {}
 
+
+SPACE_TO_DIO_LINE = {
+    '1', IOLine.DIO1_AD1,
+    '2', IOLine.DIO2_AD2,
+    '3', IOLine.DIO3_AD3,
+    '4', IOLine.DIO4_AD4,
+    '5', IOLine.DIO5_AD5,
+    '6', IOLine.DIO6,
+    '7', IOLine.DIO7,
+    '8', IOLine.DIO8,
+    '9', IOLine.DIO9,
+}
 
 # AWS api
 AWS = aws_link()
@@ -48,12 +60,15 @@ AWS = aws_link()
 ########################################################################################################################
 def on_io_sample_received(sample:IOSample, remote:RemoteXBeeDevice, time:int):
 
-    # we are only checking DIO1
-    if not sample.has_digital_value(IOLine.DIO1_AD1):
-        print ("Received IO sample doesn't have dio1, which is what we care about")
-        return
-
     addr = str(remote.get_64bit_addr())
+
+    if addr not in NODE_DATA:
+        NODE_DATA[addr] = {}
+
+    # get configuration dio lines for this addr
+    nodes = SPACE_CONFIGURATION['nodes']
+    node = nodes[str(addr)]
+
     value = sample.get_digital_value(IOLine.DIO1_AD1)
 
     if addr not in ZIGBEE_DIO1_DATA:

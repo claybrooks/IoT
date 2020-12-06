@@ -1,0 +1,24 @@
+{
+    "name": "garage_a",
+    "location": "location_a",
+    "nodes": {
+        "0013A20041B5E436": [
+            {
+                "space": 1,
+                "dio": 1
+            },
+            {
+                "space": 2,
+                "dio": 2
+            },
+            {
+                "space": 3,
+                "dio": 3
+            },
+            {
+                "space": 4,
+                "dio": 4
+            }
+        ]
+    }
+}

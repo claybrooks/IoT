@@ -50,6 +50,16 @@ SPACE_TO_DIO_LINE = {
     7: IOLine.DIO7,
     8: IOLine.DIO8,
     9: IOLine.DIO9,
+    10: IOLine.DIO10_PWM0,
+    11: IOLine.DIO11_PWM1,
+    12: IOLine.DIO12,
+    13: IOLine.DIO13,
+    14: IOLine.DIO14,
+    15: IOLine.DIO15,
+    16: IOLine.DIO16,
+    17: IOLine.DIO17,
+    18: IOLine.DIO18,
+    19: IOLine.DIO19
 }
 
 
@@ -89,8 +99,8 @@ def on_io_sample_received(sample:IOSample, remote:RemoteXBeeDevice, time:int):
         # unpack useful configuration data
         dio = SPACE_TO_DIO_LINE[config_dio]
 
+        # this io sample is not present in this update, just ignore and continue
         if not sample.has_digital_value(dio):
-            print (f"Incoming dio line {dio} from addr {addr} is not configured!")
             continue
 
         # Get the current known state of this dio line
@@ -100,7 +110,7 @@ def on_io_sample_received(sample:IOSample, remote:RemoteXBeeDevice, time:int):
 
         # if they are the same, just continue
         if new == current:
-            print (f"Incoming dio line {dio} from addr {addr} is the same!")
+            #print (f"Incoming dio line {dio} from addr {addr} is the same!")
             continue
 
         print (f"New data received from {addr} => {str(dio)}={new}")
@@ -109,7 +119,7 @@ def on_io_sample_received(sample:IOSample, remote:RemoteXBeeDevice, time:int):
         NODE_DATA[addr][dio] = new
 
         # see if the space is occupied
-        occupied = new == IOValue.HIGH
+        occupied = new == IOValue.LOW
 
         # send it off to aws
         AWS.set_spot(location, space, occupied)

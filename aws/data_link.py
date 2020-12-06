@@ -38,7 +38,7 @@ class aws_link():
     def get_spot(self, Location, Space):
         try:
             response = self.table.get_item(Key={'Location': Location, 'Spot': Space})
-            print("Got Correct Spot")
+            #print("Got Correct Spot")
         except Exception as e:
             print(e)
         else:

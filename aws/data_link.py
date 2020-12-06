@@ -42,7 +42,7 @@ class aws_link():
         except Exception as e:
             print(e)
         else:
-            return response['Item']
+            return response
 
     ####################################################################################################################
     #
@@ -82,6 +82,15 @@ class aws_link():
         else:
             return response
 
+    ####################################################################################################################
+    #
+    ####################################################################################################################
+    def set_spot(self, Location, Space, Occupied):
+        if not self.get_spot(Location, Space):
+           return self.put_spot(Location, Space, Occupied)
+        else:
+            return self.update_spot(Location, Space, Occupied)
+
 ########################################################################################################################
 #
 ########################################################################################################################
@@ -100,9 +109,19 @@ if __name__ == '__main__':
     #     pprint(response_info)
 
     # response_info = aws.put_spot("test", 0, True)
-    response_info = aws.update_spot("test", 0, True)
-    time.sleep(10.0)
-    response_info = aws.update_spot("test", 0, False)
+    # response_info = aws.update_spot("test", 0, True)
+    # time.sleep(10.0)
+    # response_info = aws.update_spot("test", 0, False)
+
+    if not aws.get_spot("Smart_Park", 1):
+        response_info = aws.put_spot("Smart_Park", 1, True)
+    else:
+        response_info = aws.update_spot("Smart_Park", 1, True)
+    response_info = aws.get_spot("Smart_Park", 1)
+
+
+    response_info = aws.update_spot("Smart_Park", 1, False)
+    response_info = aws.get_spot("Smart_Park", 1)
 
 
     pass

@@ -40,7 +40,7 @@ SPACE_CONFIGURATION = {}
 
 
 # map of string space names to their associated DIO lines
-SPACE_TO_DIO_LINE = {
+DIO_LINES = {
     1: IOLine.DIO1_AD1,
     2: IOLine.DIO2_AD2,
     3: IOLine.DIO3_AD3,
@@ -62,6 +62,8 @@ SPACE_TO_DIO_LINE = {
     19: IOLine.DIO19
 }
 
+from threading import Lock
+mutex = Lock()
 
 # AWS api
 AWS = aws_link()
@@ -72,18 +74,24 @@ AWS = aws_link()
 ########################################################################################################################
 def on_io_sample_received(sample:IOSample, remote:RemoteXBeeDevice, time:int):
 
+    mutex.acquire()
+
     # get the address of the sender node
     addr = str(remote.get_64bit_addr())
+
+    print ("*****************************************************")
+    print ("IO Sample Received from: " + str(addr))
+    print ("FRAME ID: " + str(remote.get_current_frame_id()))
 
     # add this address to our node data if it doesn't exist
     if addr not in NODE_DATA:
         NODE_DATA[addr] = {}
 
     # Data we have about our configured nodes
-    nodes       = SPACE_CONFIGURATION['nodes']
+    nodes = SPACE_CONFIGURATION['nodes']
 
     if str(addr) not in nodes:
-        print (f'addr {addr} not in configuration file!!')
+        #print (f'addr {addr} not in configuration file!!')
         return
 
     # Data we have about the node that triggered this callback
@@ -97,33 +105,31 @@ def on_io_sample_received(sample:IOSample, remote:RemoteXBeeDevice, time:int):
         space = int(s['space'])
 
         # unpack useful configuration data
-        dio = SPACE_TO_DIO_LINE[config_dio]
+        dio = DIO_LINES[config_dio]
 
         # this io sample is not present in this update, just ignore and continue
         if not sample.has_digital_value(dio):
             continue
 
         # Get the current known state of this dio line
-        current = NODE_DATA[addr].get(dio, None)
+        current = AWS.get_spot(location, space)['Item']['Occupied']
+
         # Get the new state of this dio line
-        new = sample.get_digital_value(dio)
+        new = sample.get_digital_value(dio) == IOValue.LOW
 
         # if they are the same, just continue
         if new == current:
             #print (f"Incoming dio line {dio} from addr {addr} is the same!")
             continue
 
-        print (f"New data received from {addr} => {str(dio)}={new}")
-
         # update our internal map of data
         NODE_DATA[addr][dio] = new
 
-        # see if the space is occupied
-        occupied = new == IOValue.LOW
+        AWS.set_spot(location, space, new if space != 2 else False)
 
-        # send it off to aws
-        AWS.set_spot(location, space, occupied)
+    print ("*****************************************************")
 
+    mutex.release()
 
 ########################################################################################################################
 #

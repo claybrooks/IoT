@@ -86,6 +86,7 @@ class aws_link():
     #
     ####################################################################################################################
     def set_spot(self, Location, Space, Occupied):
+        print (f'{Location}:{Space}={Occupied}')
         if not self.get_spot(Location, Space):
            return self.put_spot(Location, Space, Occupied)
         else:

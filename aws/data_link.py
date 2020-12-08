@@ -98,30 +98,15 @@ if __name__ == '__main__':
 
     aws = aws_link()
 
-    # response_info = aws.get_spot("Home", 1,)
-    # if response_info:
-    #     print("Get Spot succeeded:")
-    #     pprint(response_info)
-
-    # response_info = aws.put_spot("Home", 3, 'false')
-    # if response_info:
-    #     print("Put Spot succeeded:")
-    #     pprint(response_info)
-
-    # response_info = aws.put_spot("test", 0, True)
-    # response_info = aws.update_spot("test", 0, True)
-    # time.sleep(10.0)
-    # response_info = aws.update_spot("test", 0, False)
-
     if not aws.get_spot("Smart_Park", 1):
         response_info = aws.put_spot("Smart_Park", 1, True)
     else:
         response_info = aws.update_spot("Smart_Park", 1, True)
     response_info = aws.get_spot("Smart_Park", 1)
 
+    time.sleep(10.0)
 
     response_info = aws.update_spot("Smart_Park", 1, False)
     response_info = aws.get_spot("Smart_Park", 1)
-
 
     pass

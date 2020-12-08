@@ -22,16 +22,6 @@ class aws_link():
         self.dynamodb:Session.resource = boto3.resource('dynamodb')
         self.table = self.dynamodb.Table('Smart_Park')
 
-        # check the stream specification and enable it if it's disabled
-        stream_spec = self.table.stream_specification
-        if stream_spec is None or not stream_spec["StreamEnabled"] or stream_spec["StreamViewType"] != STREAM_VIEW_TYPE:
-            self.table.update(
-                StreamSpecification={
-                    'StreamEnabled': True,
-                    'StreamViewType': STREAM_VIEW_TYPE
-                }
-            )
-
     ####################################################################################################################
     #
     ####################################################################################################################
@@ -97,7 +87,7 @@ class aws_link():
 ########################################################################################################################
 if __name__ == '__main__':
 
-    aws = aws_link()
+    # aws = aws_link()
 
     # response_info = aws.get_spot("Home", 1,)
     # if response_info:
@@ -114,15 +104,23 @@ if __name__ == '__main__':
     # time.sleep(10.0)
     # response_info = aws.update_spot("test", 0, False)
 
-    if not aws.get_spot("Smart_Park", 1):
-        response_info = aws.put_spot("Smart_Park", 1, True)
-    else:
-        response_info = aws.update_spot("Smart_Park", 1, True)
-    response_info = aws.get_spot("Smart_Park", 1)
+
+    # if not aws.get_spot("location_a", 1):
+    #     response_info = aws.put_spot("location_a", 1, True)
+    # else:
+    #     response_info = aws.update_spot("location_a", 1, True)
+    # response_info = aws.get_spot("location_a", 1)
 
 
-    response_info = aws.update_spot("Smart_Park", 1, False)
-    response_info = aws.get_spot("Smart_Park", 1)
+    # response_info = aws.update_spot("location_a", 1, False)
+    # response_info = aws.get_spot("location_a", 1)
 
+    # import time
+    # counter = 60
+    # while counter > 0:
+    #     counter -= 1
+    #     occupied = aws.get_spot('location_a', 1)['Item']['Occupied']
+    #     print (f'{counter}: {occupied}')
+    #     time.sleep(1)
 
     pass

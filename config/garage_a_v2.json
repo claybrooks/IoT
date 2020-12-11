@@ -9,13 +9,25 @@
             },
             {
                 "space": 2,
+                "dio": 11
+            },
+            {
+                "space": 3,
                 "dio": 2
+            },
+            {
+                "space": 4,
+                "dio": 4
             }
         ],
         "0013A20041BDF44C": [
             {
-                "space": 3,
+                "space": 5,
                 "dio": 1
+            },
+            {
+                "space": 6,
+                "dio": 11
             }
         ]
     }

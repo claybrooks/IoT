@@ -112,7 +112,12 @@ def on_io_sample_received(sample:IOSample, remote:RemoteXBeeDevice, time:int):
             continue
 
         # Get the current known state of this dio line
-        current = AWS.get_spot(location, space)['Item']['Occupied']
+        spot = AWS.get_spot(location, space)
+
+        if 'Item' not in spot or 'Occupied' not in spot['Item']:
+            current = None
+        else:
+            current = spot['Item']['Occupied']
 
         # Get the new state of this dio line
         new = sample.get_digital_value(dio) == IOValue.LOW
@@ -125,7 +130,7 @@ def on_io_sample_received(sample:IOSample, remote:RemoteXBeeDevice, time:int):
         # update our internal map of data
         NODE_DATA[addr][dio] = new
 
-        AWS.set_spot(location, space, new if space != 2 else False)
+        AWS.set_spot(location, space, new)
 
     print ("*****************************************************")
 

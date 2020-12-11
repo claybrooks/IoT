@@ -89,14 +89,6 @@ if __name__ == '__main__':
 
     aws = aws_link()
 
-    if not aws.get_spot("Smart_Park", 1):
-        response_info = aws.put_spot("Smart_Park", 1, True)
-    else:
-        response_info = aws.update_spot("Smart_Park", 1, True)
-    response_info = aws.get_spot("Smart_Park", 1)
-
-    time.sleep(10.0)
-
     response_info = aws.update_spot("location_a", 1, False)
     response_info = aws.get_spot("location_a", 1)
 

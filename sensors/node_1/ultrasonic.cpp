@@ -2,11 +2,12 @@
 
 #include <Arduino.h>
 
-Ultrasonic::Ultrasonic(int XBEEPin, int trigger_pin, int echo_pin, int detect_distance):
+Ultrasonic::Ultrasonic(int XBEEPin, int trigger_pin, int echo_pin, int park_time, int detect_distance):
     m_xbee_pin(XBEEPin),
     m_trigger_pin(trigger_pin),
     m_echo_pin(echo_pin),
-    m_detect_distance(detect_distance)
+    m_detect_distance(detect_distance),
+    m_park_time(park_time)
 {
     pinMode(m_xbee_pin,     OUTPUT);
     pinMode(m_trigger_pin,  OUTPUT);
@@ -52,9 +53,9 @@ void Ultrasonic::process_ultrasonic()
     // Store in samples array
     m_samples[m_pointer] = get_distance();
 
-    Serial.print(m_xbee_pin);
-    Serial.print("=");
-    Serial.println(m_samples[m_pointer]);
+    //Serial.print(m_xbee_pin);
+    //Serial.print("=");
+    //Serial.println(m_samples[m_pointer]);
     
     // Keep track of the number of items we are currently sampling
     if (m_count < 100)
@@ -64,7 +65,7 @@ void Ultrasonic::process_ultrasonic()
 
     // increment pointer in array, wrap to 0 once we go over 99
     m_pointer += 1;
-    if (m_pointer > 100)
+    if (m_pointer >= 100)
     {
         m_pointer = 0;
     }
@@ -75,7 +76,7 @@ void Ultrasonic::process_ultrasonic()
     {
         avg += m_samples[i];
     }
-    avg = avg / m_count;
+    avg = avg / (float)m_count;
 
     if (avg > m_detect_distance)
     {
@@ -100,9 +101,10 @@ void Ultrasonic::process_ultrasonic()
     }
 
     // We are waiting for duration to elapsed before we decide the car is parked
-    if (m_park_entry_time != 0 && m_detected == 0)
+    if (m_park_entry_time != 0 && !m_detected)
     {
         int currentTime = millis();
+        
         if ((currentTime - m_park_entry_time) >= m_park_time)
         {
             m_detected = 1;
@@ -164,4 +166,9 @@ void Ultrasonic::set_random_interval(int time)
 void Ultrasonic::set_park_time(int time)
 {
     m_park_time = time * 1000;
+}
+
+int Ultrasonic::get_detected()
+{
+    return m_detected;
 }

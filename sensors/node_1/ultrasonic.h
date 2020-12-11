@@ -4,9 +4,10 @@ class Ultrasonic
 
 public:
 
-    Ultrasonic(int XBEEPin, int trigger_pin, int echo_pin, int detect_distance=30);
+    Ultrasonic(int XBEEPin, int trigger_pin, int echo_pin, int park_time=10*1000, int detect_distance=30);
 
     void process();
+    int  get_detected();
     int  get_distance();
     void set_random_interval(int time);
     void set_park_time(int time);
@@ -27,7 +28,7 @@ private:
     int time_since_last_dummy_flip = -1;
     int time_since_dummy_start = -1;
 
-    int m_park_time = 1 * 1000;
+    int m_park_time;
 
     int  m_samples[100];
     int  m_count = 0;

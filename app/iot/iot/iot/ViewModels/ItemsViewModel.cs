@@ -145,11 +145,7 @@ namespace iot.ViewModels
 
         public void DisplayGarageInfo(ScanResponse result)
         {
-        }
 
-        public void HandleStream(object o, ResponseEventArgs r)
-        {
-            Console.WriteLine("Got a stream response");
         }
 
 
@@ -166,21 +162,6 @@ namespace iot.ViewModels
             LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand());
 
             ItemTapped = new Command<Item>(OnItemSelected);
-
-            /*
-            _streamClient = new AmazonDynamoDBStreamsClient(_credentials, Amazon.RegionEndpoint.USEast2);
-            _streamClient.AfterResponseEvent += HandleStream;
-            Task<ListStreamsResponse> listStreamsResponseTask = _streamClient.ListStreamsAsync();
-            listStreamsResponseTask.Wait();
-            ListStreamsResponse listStreamsResponse = listStreamsResponseTask.Result;
-
-
-            foreach (StreamSummary streamSummary in listStreamsResponse.Streams)
-            {
-                int i = 0;
-                i++;
-            }
-            */
 
             TimerCallback timerDelegate = new TimerCallback(UpdateGarageTable);
             _timerHandle = new Timer(timerDelegate, null, 1000, 1000);

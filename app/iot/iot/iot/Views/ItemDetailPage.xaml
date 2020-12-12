@@ -7,10 +7,10 @@
     <StackLayout Spacing="20" Padding="15">
         <Label Text="Location:"             FontSize="Medium"   TextColor="Black"/>
         <Label Text="{Binding Location}"    FontSize="Small"    TextColor="Black"/>
-        <Label Text="Occupied:"             FontSize="Medium"   TextColor="Black"/>
-        <Label Text="{Binding Occupied}"    FontSize="Small"    TextColor="Black"/>
         <Label Text="Spot:"                 FontSize="Medium"   TextColor="Black"/>
         <Label Text="{Binding Spot}"        FontSize="Small"    TextColor="Black"/>
+        <Label Text="Occupied:"             FontSize="Medium"   TextColor="Black"/>
+        <Label Text="{Binding Occupied}"    FontSize="Small"    TextColor="Black"/>
         <Label Text="TimeIn:"               FontSize="Medium"   TextColor="Black"/>
         <Label Text="{Binding TimeIn}"      FontSize="Small"    TextColor="Black"/>
         <Label Text="BilledTime:"           FontSize="Medium"   TextColor="Black" />

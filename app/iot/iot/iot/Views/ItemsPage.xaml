@@ -21,11 +21,11 @@
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <StackLayout Padding="10" x:DataType="model:Item">
-                        <Label Text="{Binding Location}"    LineBreakMode="NoWrap" Style="{DynamicResource ListItemTextStyle}"         FontSize="16"  TextColor="Black"/>
-                        <Label Text="{Binding Occupied}"    LineBreakMode="NoWrap" Style="{DynamicResource ListItemDetailTextStyle}"   FontSize="13"  TextColor="Black"/>
-                        <Label Text="{Binding Spot}"        LineBreakMode="NoWrap" Style="{DynamicResource ListItemDetailTextStyle}"   FontSize="13"  TextColor="Black"/>
-                        <Label Text="{Binding TimeIn}"      LineBreakMode="NoWrap" Style="{DynamicResource ListItemDetailTextStyle}"   FontSize="13"  TextColor="Black"/>
-                        <Label Text="{Binding BilledTime}"  LineBreakMode="NoWrap" Style="{DynamicResource ListItemDetailTextStyle}"   FontSize="13"  TextColor="Black"/>
+                        <Label Text="{Binding Location,     StringFormat='Garage: {0}'}"    LineBreakMode="NoWrap" Style="{DynamicResource ListItemTextStyle}"         FontSize="16"  TextColor="Black"/>
+                        <Label Text="{Binding Spot,         StringFormat='Spot: {0}'}"        LineBreakMode="NoWrap" Style="{DynamicResource ListItemDetailTextStyle}"   FontSize="13"  TextColor="Black"/>
+                        <Label Text="{Binding Occupied,     StringFormat='Occupied: {0}'}"    LineBreakMode="NoWrap" Style="{DynamicResource ListItemDetailTextStyle}"   FontSize="13"  TextColor="Black"/>
+                        <Label Text="{Binding TimeIn,       StringFormat='Time In: {0}'}"      LineBreakMode="NoWrap" Style="{DynamicResource ListItemDetailTextStyle}"   FontSize="13"  TextColor="Black"/>
+                        <Label Text="{Binding BilledTime,   StringFormat='BilledTime: {0}'}"  LineBreakMode="NoWrap" Style="{DynamicResource ListItemDetailTextStyle}"   FontSize="13"  TextColor="Black"/>
                         <StackLayout.GestureRecognizers>
                             <TapGestureRecognizer 
                                 NumberOfTapsRequired="1"

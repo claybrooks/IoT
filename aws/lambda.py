@@ -2,6 +2,9 @@ import json
 import boto3
 import datetime
 
+###############################################################
+# Lambda handler from DynamoDB (Handles Insert/Modify/Remove)
+################################################################
 def lambda_handler(event, context):
     try:
         for record in event['Records']:
@@ -16,6 +19,11 @@ def lambda_handler(event, context):
         print(e)
         return "An Exception has occurred"
 
+###############################################################
+# Update function for when an entry is inserted
+# It will check the current status of the spot
+# and update the time in based on the current time
+################################################################
 def handle_insert(record):
     print('Handling INSERT event')
     client = boto3.resource('dynamodb')
@@ -39,7 +47,11 @@ def handle_insert(record):
         ReturnValues="UPDATED_NEW"
     )
     return response
-    
+
+###############################################################
+# Modify function for when an entry is changed
+# Update the time in and billing time when Occupied changes
+################################################################  
 def handle_modify(record):
     print('Handling MODIFY event')
     
